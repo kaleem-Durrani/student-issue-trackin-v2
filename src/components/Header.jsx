@@ -3,6 +3,7 @@ import { Navbar, Nav, Container } from "react-bootstrap";
 import { FaUser, FaListUl, FaRegEdit } from "react-icons/fa";
 import { LinkContainer } from "react-router-bootstrap";
 import { PiStudentFill } from "react-icons/pi";
+import { LuLayoutDashboard } from "react-icons/lu";
 
 const Header = () => {
   return (
@@ -18,6 +19,14 @@ const Header = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
+              <LinkContainer to="/adminIssueList">
+                <Nav.Link>Admin Issue List</Nav.Link>
+              </LinkContainer>
+              <LinkContainer to="/adminHomeScreen">
+                <Nav.Link>
+                  <LuLayoutDashboard /> Admin Dashboard
+                </Nav.Link>
+              </LinkContainer>
               <LinkContainer to="/createIssues">
                 <Nav.Link>
                   <FaRegEdit /> Create Issues

@@ -16,6 +16,9 @@ import IssueList from "./screens/issueList/IssueList";
 import SignIn from "./screens/auth/signIn/SignIn";
 import SignUp from "./screens/auth/signUp/SignUp";
 import IssueDetail from "./screens/issueDetail/IssueDetail";
+import AdminHomeScreen from "./screens/adminHomeScreen/AdminHomeScreen";
+import AdminIssueList from "./screens/adminIssueList/AdminIssueList";
+import AdminIssueDetail from "./screens/adminIssueDetail/AdminIssueDetail";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -26,6 +29,9 @@ const router = createBrowserRouter(
       <Route path="/signIn" element={<SignIn />} />
       <Route path="/signUp" element={<SignUp />} />
       <Route path="/issueDetail" element={<IssueDetail />} />
+      <Route path="/adminHomeScreen" element={<AdminHomeScreen />} />
+      <Route path="/adminIssueList" element={<AdminIssueList />} />
+      <Route path="/adminIssueDetail" element={<AdminIssueDetail />} />
     </Route>
   )
 );
