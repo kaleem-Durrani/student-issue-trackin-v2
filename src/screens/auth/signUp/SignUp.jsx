@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Select from "react-select";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const departments = [
-  { value: "cs", label: "Computer Science" },
-  { value: "ee", label: "Electrical Engineering" },
-  { value: "me", label: "Mechanical Engineering" },
-  { value: "ba", label: "Business Administration" },
+  { value: "Computer Science", label: "Computer Science" },
+  { value: "Electrical Engineering", label: "Electrical Engineering" },
+  { value: "Mechanical Engineering", label: "Mechanical Engineering" },
+  { value: "Business Administration", label: "Business Administration" },
 ];
 
 const SignUp = () => {
@@ -18,7 +19,11 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = (event) => {
+  const [loading, setLoading] = useState(false);
+
+  const { signup } = useAuth();
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Validate all fields are filled
@@ -43,10 +48,25 @@ const SignUp = () => {
       name,
       email,
       cms,
-      department: department?.label,
+      department: department?.value,
       password,
       confirmPassword,
     });
+
+    setLoading(true);
+    const response = await signup(
+      name,
+      email,
+      cms,
+      department?.value,
+      password,
+      confirmPassword
+    );
+    setLoading(false);
+
+    if (!response.ok) {
+      console.log(response.data.error);
+    }
 
     // Proceed with form submission logic (e.g., API call)
   };
@@ -132,7 +152,12 @@ const SignUp = () => {
               </Form.FloatingLabel>
             </Form.Group>
 
-            <Button variant="primary" type="submit" className="w-100 mb-3">
+            <Button
+              disabled={loading}
+              variant="primary"
+              type="submit"
+              className="w-100 mb-3"
+            >
               Register
             </Button>
 

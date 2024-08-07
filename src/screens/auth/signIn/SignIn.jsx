@@ -9,13 +9,17 @@ import {
   ToggleButton,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const SignIn = () => {
   const [loginAs, setLoginAs] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event) => {
+  const { login } = useAuth();
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Validate all fields are filled
@@ -29,6 +33,14 @@ const SignIn = () => {
       email,
       password,
     });
+
+    setLoading(true);
+    const response = await login(email, password, loginAs);
+    setLoading(false);
+
+    if (!response.ok) {
+      console.log(response.data.error);
+    }
 
     // Proceed with form submission logic (e.g., API call)
   };
@@ -76,6 +88,7 @@ const SignIn = () => {
             className="mb-4"
           >
             <ToggleButton
+              disabled={loading}
               id="tbg-radio-1"
               value={"student"}
               variant="outline-primary"
@@ -83,6 +96,7 @@ const SignIn = () => {
               Login as Student
             </ToggleButton>
             <ToggleButton
+              disabled={loading}
               id="tbg-radio-2"
               value={"admin"}
               variant="outline-secondary"
@@ -117,7 +131,12 @@ const SignIn = () => {
               </Form.FloatingLabel>
             </Form.Group>
 
-            <Button variant="primary" type="submit" className="w-100 mb-3">
+            <Button
+              disabled={loading}
+              variant="primary"
+              type="submit"
+              className="w-100 mb-3"
+            >
               Sign In
             </Button>
 

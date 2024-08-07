@@ -3,29 +3,29 @@ import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import Select from "react-select";
 
 const categories = [
-  { value: "harrasment", label: "Harrasment" },
-  { value: "exam_issue", label: "Exam Issue" },
-  { value: "teacher_behavior", label: "Teacher Behavior" },
-  { value: "focal_person_behavior", label: "Focal Person Behavior" },
-  { value: "bus_related_issue", label: "Bus Related Issue" },
-  { value: "fee_issue", label: "Fee Issue" },
-  { value: "scholarship_issue", label: "Scholarship Issue" },
-  { value: "guard_behavior", label: "Guard Behavior" },
-  { value: "attendance_issue", label: "Attendance Issue" },
-  { value: "other", label: "Other" },
+  { value: "Harrasment", label: "Harrasment" },
+  { value: "Exam Issue", label: "Exam Issue" },
+  { value: "Teacher Behavior", label: "Teacher Behavior" },
+  { value: "Focal Person Behavior", label: "Focal Person Behavior" },
+  { value: "Bus Related Issue", label: "Bus Related Issue" },
+  { value: "Fee Issue", label: "Fee Issue" },
+  { value: "Scholarship Issue", label: "Scholarship Issue" },
+  { value: "Guard Behavior", label: "Guard Behavior" },
+  { value: "Attendance Issue", label: "Attendance Issue" },
+  { value: "Other", label: "Other" },
 ];
 
 const priorities = [
-  { value: "high", label: "High" },
-  { value: "medium", label: "Medium" },
-  { value: "low", label: "Low" },
+  { value: "High", label: "High" },
+  { value: "Medium", label: "Medium" },
+  { value: "Low", label: "Low" },
 ];
 
 const departments = [
-  { value: "transport", label: "Transport" },
-  { value: "academic", label: "Academic" },
-  { value: "discipline", label: "Discipline" },
-  { value: "student_affairs", label: "Student Affairs" },
+  { value: "Transport", label: "Transport" },
+  { value: "Academic", label: "Academic" },
+  { value: "Discipline", label: "Discipline" },
+  { value: "Student Affairs", label: "Student Affairs" },
 ];
 
 const CreateIssue = () => {
@@ -43,7 +43,7 @@ const CreateIssue = () => {
     if (
       !title ||
       !category ||
-      (category.value === "other" && !customCategory) ||
+      (category.value === "Other" && !customCategory) ||
       !priority ||
       !department ||
       !description
@@ -136,7 +136,7 @@ const CreateIssue = () => {
               />
             </Form.Group>
 
-            {category?.value === "other" && (
+            {category?.value === "Other" && (
               <Form.Group className="mb-3" controlId="formCustomCategory">
                 <Form.FloatingLabel label="Custom Category">
                   <Form.Control

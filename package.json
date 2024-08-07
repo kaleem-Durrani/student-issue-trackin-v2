@@ -2,6 +2,7 @@
   "name": "student-issue-trackin-v2",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
@@ -9,6 +10,8 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "apisauce": "^3.0.0",
+    "axios": "^1.7.3",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.3",
     "react": "^18.3.1",
