@@ -7,10 +7,13 @@ import { LuLayoutDashboard } from "react-icons/lu";
 import { GrUserManager } from "react-icons/gr";
 import { GoUnverified } from "react-icons/go";
 import { useAuth } from "../contexts/AuthContext";
+import { useIssueList } from "../contexts/IssueListContex";
 
 const Header = () => {
   const { user, logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const { resetIssueList } = useIssueList();
 
   const handleLogout = () => {
     setShowLogoutModal(true);
@@ -18,6 +21,7 @@ const Header = () => {
 
   const confirmLogout = () => {
     logout();
+    resetIssueList();
     setShowLogoutModal(false);
   };
 
@@ -77,34 +81,36 @@ const Header = () => {
                         <Nav.Link
                           className="d-flex align-items-center"
                           as={NavLink}
+                          to="/adminHomeScreen"
+                        >
+                          <LuLayoutDashboard className="me-1" />
+                          <big>Admin Dashboard</big>
+                        </Nav.Link>
+
+                        <Nav.Link
+                          className="d-flex align-items-center"
+                          as={NavLink}
                           to="/adminIssueList"
                         >
                           <GrUserManager className="me-1" />
                           <FaListUl className="me-1" />
                           <big>Admin Issue List</big>
                         </Nav.Link>
-
-                        <Nav.Link
-                          className="d-flex align-items-center"
-                          as={NavLink}
-                          to="/adminHomeScreen"
-                        >
-                          <LuLayoutDashboard className="me-1" />
-                          <big>Admin Dashboard</big>
-                        </Nav.Link>
                       </>
                     )}
 
-                    {user.isVerified && user.adminType !== "mainAdmin" && (
-                      <Nav.Link
-                        className="d-flex align-items-center"
-                        as={NavLink}
-                        to="/departmentAdminHome"
-                      >
-                        <FaUser className="me-1" />
-                        <big>Dept. Admin Home</big>
-                      </Nav.Link>
-                    )}
+                    {user.isVerified &&
+                      user.adminType &&
+                      user.adminType !== "mainAdmin" && (
+                        <Nav.Link
+                          className="d-flex align-items-center"
+                          as={NavLink}
+                          to="/departmentAdminHome"
+                        >
+                          <FaUser className="me-1" />
+                          <big>Dept. Admin Home</big>
+                        </Nav.Link>
+                      )}
 
                     {user.isVerified && !user.adminType && (
                       <>

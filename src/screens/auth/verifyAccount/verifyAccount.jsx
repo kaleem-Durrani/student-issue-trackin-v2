@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -8,9 +8,18 @@ import {
   Badge,
   Alert,
 } from "react-bootstrap";
+import useApi from "../../../hooks/useApi";
+import authApi from "../../../api/authApi";
+import { useAuth } from "../../../contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const VerifyAccount = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const { setUser, setUserType } = useAuth();
+
+  const verifyOtpApi = useApi(authApi.verifyOtpStudent);
+
+  const requestNewOtpApi = useApi(authApi.requestNewOtpStudent);
 
   // Handle OTP input change
   const handleOtpChange = (element, index) => {
@@ -52,6 +61,41 @@ const VerifyAccount = () => {
   // Check if all OTP fields are filled
   const isOtpComplete = otp.every((digit) => digit !== "");
 
+  const handleVerifyOtp = async () => {
+    console.log(otp.join("").replace(",", ""));
+    await verifyOtpApi.request(otp.join("").replace(",", ""));
+  };
+
+  useEffect(() => {
+    if (verifyOtpApi.data) {
+      toast.success(verifyOtpApi.data.message);
+      setUser(verifyOtpApi.data.user);
+      setUserType(verifyOtpApi.data.userType);
+      return;
+      // Redirect to login page
+    }
+    if (verifyOtpApi.error) {
+      toast.error(verifyOtpApi.error);
+      return;
+    }
+  }, [verifyOtpApi.data, verifyOtpApi.error]);
+
+  const handleRequestNewOtp = async () => {
+    await requestNewOtpApi.request();
+  };
+
+  useEffect(() => {
+    if (requestNewOtpApi.data) {
+      toast.success(requestNewOtpApi.data.message);
+      return;
+      // Redirect to login page
+    }
+    if (requestNewOtpApi.error) {
+      toast.error(requestNewOtpApi.error);
+      return;
+    }
+  }, [requestNewOtpApi.data, requestNewOtpApi.error]);
+
   return (
     <Container className="mt-5">
       <h1 className="text-center">Welcome, Dear Student</h1>
@@ -79,11 +123,13 @@ const VerifyAccount = () => {
             If you have not received the OTP, please click the button below:
           </p>
           <Button
+            disabled={verifyOtpApi.loading || requestNewOtpApi.loading}
             variant="light"
             style={{
               alignSelf: "center",
               boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)",
             }}
+            onClick={handleRequestNewOtp}
           >
             Request Another OTP
           </Button>
@@ -113,7 +159,10 @@ const VerifyAccount = () => {
             style={{ boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)" }}
             variant="success"
             className="mt-4"
-            disabled={!isOtpComplete}
+            disabled={
+              !isOtpComplete || verifyOtpApi.loading || requestNewOtpApi.loading
+            }
+            onClick={handleVerifyOtp}
           >
             Verify OTP
           </Button>

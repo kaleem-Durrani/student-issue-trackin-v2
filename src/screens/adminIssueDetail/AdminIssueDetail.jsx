@@ -1,34 +1,31 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Card, Badge, ListGroup, Row, Col, Button } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Card,
+  Badge,
+  ListGroup,
+  Row,
+  Col,
+  Button,
+  Modal,
+} from "react-bootstrap";
 import Select from "react-select";
+import useApi from "../../hooks/useApi";
+import adminApis from "../../api/adminApis";
+import { useIssueList } from "../../contexts/IssueListContex";
 
 const AdminIssueDetail = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { issue } = location.state || {};
+  const { refreshIssueList } = useIssueList();
 
-  const formattedDate = new Date(issue?.createdAt).toLocaleString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
-  });
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [actionType, setActionType] = useState(null); // 'assign' or 'reject'
 
-  const getPriorityBadgeVariant = (priority) => {
-    switch (priority) {
-      case "High":
-        return "danger";
-      case "Medium":
-        return "warning";
-      case "Low":
-        return "success";
-      default:
-        return "secondary";
-    }
-  };
+  const assignIssueApi = useApi(adminApis.assignIssue);
+  const rejectIssueApi = useApi(adminApis.rejectIssue);
 
   const categories = [
     { value: "Harrasment", label: "Harrasment" },
@@ -56,7 +53,6 @@ const AdminIssueDetail = () => {
     { value: "Student Affairs", label: "Student Affairs" },
   ];
 
-  // State management for the selects
   const [selectedCategory, setSelectedCategory] = useState(
     categories.find((c) => c.label === issue?.category)
   );
@@ -69,21 +65,74 @@ const AdminIssueDetail = () => {
     departments.find((d) => d.label === issue?.department)
   );
 
-  const handleAssign = () => {
-    console.log("Assigned Issue Details:");
-    console.log("Category:", selectedCategory);
-    console.log("Priority:", selectedPriority);
-    console.log("Department:", selectedDepartment);
-    console.log("Issue:", issue);
+  const getBadgeVariant = (type, value) => {
+    const variants = {
+      priority: {
+        High: "danger",
+        Medium: "warning",
+        Low: "success",
+      },
+      status: {
+        Pending: "info",
+        Assigned: "primary",
+        "In Progress": "warning",
+        Resolved: "success",
+        Rejected: "danger",
+      },
+    };
+    return variants[type]?.[value] || "secondary";
   };
 
-  const handleReject = () => {
-    console.log("Rejected Issue Details:");
-    console.log("Category:", selectedCategory);
-    console.log("Priority:", selectedPriority);
-    console.log("Department:", selectedDepartment);
-    console.log("Issue:", issue);
+  const handleIssueAction = async () => {
+    setLoading(true);
+    const apiFunc = actionType === "assign" ? assignIssueApi : rejectIssueApi;
+
+    if (actionType === "assign") {
+      await apiFunc.request(
+        issue._id,
+        selectedCategory?.value,
+        selectedPriority?.value,
+        selectedDepartment?.value
+      );
+    } else {
+      await apiFunc.request(issue._id);
+    }
+
+    setLoading(false);
+    setShowModal(false); // Close modal after action
   };
+
+  useEffect(() => {
+    if (assignIssueApi.data || rejectIssueApi.data) {
+      refreshIssueList();
+      navigate("/adminIssueList");
+    }
+  }, [assignIssueApi.data, rejectIssueApi.data]);
+
+  useEffect(() => {
+    if (assignIssueApi.error || rejectIssueApi.error) {
+      console.error(`Error: ${assignIssueApi.error || rejectIssueApi.error}`);
+    }
+  }, [assignIssueApi.error, rejectIssueApi.error]);
+
+  const handleShowModal = (action) => {
+    setActionType(action);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const formattedDate = new Date(issue?.createdAt).toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
 
   return (
     <div className="container mt-5">
@@ -95,8 +144,11 @@ const AdminIssueDetail = () => {
           <Row className="mb-3">
             <Col md={8}>
               <h5>
-                <Badge bg={getPriorityBadgeVariant(issue?.priority)}>
+                <Badge bg={getBadgeVariant("priority", issue?.priority)}>
                   {selectedPriority?.label} Priority
+                </Badge>{" "}
+                <Badge bg={getBadgeVariant("status", issue?.status)}>
+                  Status: {issue?.status}
                 </Badge>
               </h5>
             </Col>
@@ -108,36 +160,57 @@ const AdminIssueDetail = () => {
             <Col md={6}>
               <ListGroup variant="flush">
                 <ListGroup.Item>
-                  <strong>Category:</strong>
-                  <Select
-                    value={selectedCategory}
-                    onChange={(option) => setSelectedCategory(option)}
-                    options={categories}
-                  />
+                  {issue.status === "Pending" ? (
+                    <>
+                      <strong>Category:</strong>
+                      <Select
+                        value={selectedCategory}
+                        onChange={(option) => setSelectedCategory(option)}
+                        options={categories}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <strong>Category: </strong> {issue.category}
+                    </>
+                  )}
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <strong>Department:</strong>
-                  <Select
-                    value={selectedDepartment}
-                    onChange={(option) => setSelectedDepartment(option)}
-                    options={departments}
-                  />
+                  {issue.status === "Pending" ? (
+                    <>
+                      <strong>Department:</strong>
+                      <Select
+                        value={selectedDepartment}
+                        onChange={(option) => setSelectedDepartment(option)}
+                        options={departments}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <strong>Department:</strong> {issue?.department}
+                    </>
+                  )}
                 </ListGroup.Item>
-                <ListGroup.Item>
-                  <strong>Priority:</strong>
-                  <Select
-                    value={selectedPriority}
-                    onChange={(option) => setSelectedPriority(option)}
-                    options={priorities}
-                  />
-                </ListGroup.Item>
+
+                {issue.status === "Pending" && (
+                  <ListGroup.Item>
+                    <strong>Priority:</strong>
+                    <Select
+                      value={selectedPriority}
+                      onChange={(option) => setSelectedPriority(option)}
+                      options={priorities}
+                    />
+                  </ListGroup.Item>
+                )}
               </ListGroup>
             </Col>
             <Col md={6}>
               <ListGroup variant="flush">
                 <ListGroup.Item>
-                  <strong>Created By:</strong> {issue?.createdBy.name} (
-                  {issue?.createdBy.cms})
+                  <strong>Created By:</strong> {issue?.createdBy.name}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong>Cms: </strong> {issue?.createdBy.cms}
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <strong>Email:</strong> {issue?.createdBy.email}
@@ -148,27 +221,69 @@ const AdminIssueDetail = () => {
               </ListGroup>
             </Col>
           </Row>
-          <hr />
-          <Row>
-            <Col>
-              <Card.Text>
-                <strong>Description:</strong>
-              </Card.Text>
-              <Card.Text>{issue?.description}</Card.Text>
-            </Col>
-          </Row>
           <Row className="mt-4">
-            <Col className="d-flex justify-content-end">
-              <Button variant="success" onClick={handleAssign} className="me-2">
-                Assign
-              </Button>
-              <Button variant="danger" onClick={handleReject}>
-                Reject
-              </Button>
+            <Col>
+              <h5>Details</h5>
+              <p>{issue?.description}</p>
             </Col>
           </Row>
+          {issue.status === "Pending" && (
+            <Row className="mt-4">
+              <Col className="text-center">
+                <Button
+                  variant="primary"
+                  disabled={loading}
+                  onClick={() => handleShowModal("assign")}
+                >
+                  Assign Issue
+                </Button>{" "}
+                <Button
+                  variant="danger"
+                  disabled={loading}
+                  onClick={() => handleShowModal("reject")}
+                >
+                  Reject Issue
+                </Button>
+              </Col>
+            </Row>
+          )}
         </Card.Body>
       </Card>
+
+      {/* Confirmation Modal */}
+      <Modal show={showModal} onHide={handleCloseModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {actionType === "assign"
+              ? "Confirm Assignment"
+              : "Confirm Rejection"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to {actionType} this issue?</p>
+          <p>
+            <strong>Title:</strong> {issue?.title}
+          </p>
+          <p>
+            <strong>Category:</strong> {selectedCategory?.label}
+          </p>
+          <p>
+            <strong>Department:</strong> {selectedDepartment?.label}
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Cancel
+          </Button>
+          <Button
+            variant={actionType === "assign" ? "primary" : "danger"}
+            onClick={handleIssueAction}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : `Confirm ${actionType}`}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

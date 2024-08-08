@@ -29,6 +29,8 @@ import DepartmentAdminHome from "./screens/departmentAdminHome/DepartmentAdminHo
 import VerifyAccountRoute from "./components/VerifyAccountRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthRoute from "./components/AuthRoute";
+import { IssueListProvider } from "./contexts/IssueListContex";
+import DepartmentAdminIssueDetail from "./screens/deptAdminIssueDetail/DepartmentAdminIssueDetail";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -65,6 +67,10 @@ const router = createBrowserRouter(
       {/* When logged in as department admin */}
       <Route element={<ProtectedRoute role="departmentAdmin" />}>
         <Route path="/departmentAdminHome" element={<DepartmentAdminHome />} />
+        <Route
+          path="/departmentAdminIssueDetail"
+          element={<DepartmentAdminIssueDetail />}
+        />
       </Route>
     </Route>
   )
@@ -111,7 +117,9 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <IssueListProvider>
+        <RouterProvider router={router} />
+      </IssueListProvider>
     </AuthProvider>
   </React.StrictMode>
 );

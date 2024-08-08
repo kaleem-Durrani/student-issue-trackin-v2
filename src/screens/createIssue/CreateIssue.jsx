@@ -1,6 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import Select from "react-select";
+import useApi from "../../hooks/useApi";
+import studentApis from "../../api/studentApis";
+import { useIssueList } from "../../contexts/IssueListContex";
+import { useNavigate } from "react-router-dom";
 
 const categories = [
   { value: "Harrasment", label: "Harrasment" },
@@ -36,7 +40,14 @@ const CreateIssue = () => {
   const [department, setDepartment] = useState(null);
   const [description, setDescription] = useState("");
 
-  const handleSubmit = (event) => {
+  const navigate = useNavigate();
+
+  const { refreshIssueList } = useIssueList();
+
+  const createIssueApi = useApi(studentApis.createIssue);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Validate that all fields are filled
@@ -54,15 +65,48 @@ const CreateIssue = () => {
 
     console.log({
       title,
-      category: category?.label,
-      customCategory: customCategory || null,
-      priority: priority?.label,
-      department: department?.label,
+      category: category?.value,
+      // customCategory: customCategory || null,
+      priority: priority?.value,
+      department: department?.value,
       description,
     });
 
+    setLoading(true);
+    await createIssueApi.request(
+      title,
+      category?.value,
+      // customCategory || null,
+      priority?.value,
+      department?.value,
+      description
+    );
+    setLoading(false);
+
     // Proceed with form submission logic (e.g., API call)
   };
+
+  useEffect(() => {
+    if (createIssueApi.data) {
+      console.log(`Issue ${createIssueApi.data.message}`);
+      // Reset form fields
+      setTitle("");
+      setCategory(null);
+      setCustomCategory("");
+      setPriority(null);
+      setDepartment(null);
+      setDescription("");
+
+      refreshIssueList();
+      navigate("/home");
+
+      return;
+    }
+    if (createIssueApi.error) {
+      console.log(createIssueApi.error);
+      return;
+    }
+  }, [createIssueApi.data, createIssueApi.error]);
 
   return (
     <Container
@@ -114,6 +158,7 @@ const CreateIssue = () => {
             <Form.Group className="mb-3" controlId="formTitle">
               <Form.FloatingLabel label="Title">
                 <Form.Control
+                  disabled={loading}
                   type="text"
                   placeholder="Issue Title"
                   value={title}
@@ -127,6 +172,7 @@ const CreateIssue = () => {
             <Form.Group className="mb-3" controlId="formCategory">
               <Form.Label>Category</Form.Label>
               <Select
+                isDisabled={loading}
                 isClearable={true}
                 options={categories}
                 placeholder="Select a category"
@@ -140,6 +186,7 @@ const CreateIssue = () => {
               <Form.Group className="mb-3" controlId="formCustomCategory">
                 <Form.FloatingLabel label="Custom Category">
                   <Form.Control
+                    disabled={loading}
                     type="text"
                     placeholder="Specify your category"
                     value={customCategory}
@@ -153,6 +200,7 @@ const CreateIssue = () => {
             <Form.Group className="mb-3" controlId="formPriority">
               <Form.Label>Priority</Form.Label>
               <Select
+                isDisabled={loading}
                 isClearable={true}
                 options={priorities}
                 placeholder="Select priority"
@@ -165,6 +213,7 @@ const CreateIssue = () => {
             <Form.Group className="mb-3" controlId="formDepartment">
               <Form.Label>Concerned Department</Form.Label>
               <Select
+                isDisabled={loading}
                 isClearable={true}
                 options={departments}
                 placeholder="Select department"
@@ -177,6 +226,7 @@ const CreateIssue = () => {
             <Form.Group className="mb-3" controlId="formDescription">
               <Form.FloatingLabel label="Description">
                 <Form.Control
+                  disabled={loading}
                   as="textarea"
                   placeholder="Describe the issue"
                   style={{ height: "150px" }}
@@ -188,7 +238,12 @@ const CreateIssue = () => {
               </Form.FloatingLabel>
             </Form.Group>
 
-            <Button variant="primary" type="submit" className="w-100 mb-3">
+            <Button
+              disabled={loading}
+              variant="primary"
+              type="submit"
+              className="w-100 mb-3"
+            >
               Create Issue
             </Button>
           </Form>

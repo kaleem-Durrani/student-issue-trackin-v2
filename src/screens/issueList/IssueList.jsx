@@ -1,68 +1,39 @@
-import React, { useState } from "react";
-import { Container, Row, Col, Pagination } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Pagination, Form } from "react-bootstrap";
 import IssueCard from "./components/IssueCard";
+import { useIssueList } from "../../contexts/IssueListContex";
 
 const IssueList = () => {
-  // Static list of issues
-  const issues = [
-    {
-      title: "Issue 1",
-      category: "Exam Issue",
-      priority: "High",
-      department: "Academic",
-      description: "Issue with the final exam schedule.",
-      createdBy: {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        cms: "CMS001",
-        department: "Computer Science",
-      },
-      status: "Open",
-      createdAt: "2024-08-01T10:30:00Z",
-    },
-    {
-      title: "Issue 2",
-      category: "Harassment",
-      priority: "Medium",
-      department: "Discipline",
-      description: "Harassment complaint filed by a student.",
-      createdBy: {
-        name: "Jane Doe",
-        email: "jane.doe@example.com",
-        cms: "CMS002",
-        department: "Business Administration",
-      },
-      status: "Open",
-      createdAt: "2024-08-02T12:45:00Z",
-    },
-    {
-      title: "Issue 1",
-      category: "Exam Issue",
-      priority: "Low",
-      department: "Academic",
-      description: "Issue with the final exam schedule.",
-      createdBy: {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        cms: "CMS001",
-        department: "Computer Science",
-      },
-      status: "Open",
-      createdAt: "2024-08-01T10:30:00Z",
-    },
-  ];
+  const { issueList, isError, fetchIssueList, loading } = useIssueList();
 
-  // Pagination logic
+  const [filter, setFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const issuesPerPage = 10;
 
-  // Calculate the indices for slicing the issues array
+  useEffect(() => {
+    if (issueList) return;
+    fetchIssueList();
+  }, []);
+
+  // Filter issues based on the selected filter (status or priority)
+  const filteredIssues = issueList
+    ? issueList.filter((issue) => {
+        if (filter === "All") return true;
+        // Check if the filter matches the status or the priority
+        return issue.status === filter || issue.priority === filter;
+      })
+    : [];
+
+  // Pagination logic
   const indexOfLastIssue = currentPage * issuesPerPage;
   const indexOfFirstIssue = indexOfLastIssue - issuesPerPage;
-  const currentIssues = issues.slice(indexOfFirstIssue, indexOfLastIssue);
+  const currentIssues = filteredIssues.slice(
+    indexOfFirstIssue,
+    indexOfLastIssue
+  );
 
   // Calculate the total number of pages
-  const totalPages = Math.ceil(issues.length / issuesPerPage);
+  const totalPages = Math.ceil(filteredIssues.length / issuesPerPage);
 
   // Handle page change
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
@@ -73,7 +44,6 @@ const IssueList = () => {
     const maxEdgePages = 4;
 
     if (totalPages <= maxEdgePages + maxMiddlePages + maxEdgePages) {
-      // If total pages are less than or equal to the total pagination length, show all pages
       for (let i = 1; i <= totalPages; i++) {
         items.push(
           <Pagination.Item
@@ -86,7 +56,6 @@ const IssueList = () => {
         );
       }
     } else {
-      // Show the first 4 pages
       for (let i = 1; i <= maxEdgePages; i++) {
         items.push(
           <Pagination.Item
@@ -99,12 +68,10 @@ const IssueList = () => {
         );
       }
 
-      // Show dots if there is a gap between the first 4 pages and the middle pages
       if (currentPage > maxEdgePages + 1) {
         items.push(<Pagination.Ellipsis key="start-ellipsis" />);
       }
 
-      // Show the 3 pages in the middle
       const middleStart = Math.max(currentPage - 1, maxEdgePages + 1);
       const middleEnd = Math.min(currentPage + 1, totalPages - maxEdgePages);
       for (let i = middleStart; i <= middleEnd; i++) {
@@ -119,12 +86,10 @@ const IssueList = () => {
         );
       }
 
-      // Show dots if there is a gap between the middle pages and the last 4 pages
       if (currentPage < totalPages - maxEdgePages - 1) {
         items.push(<Pagination.Ellipsis key="end-ellipsis" />);
       }
 
-      // Show the last 4 pages
       for (let i = totalPages - maxEdgePages + 1; i <= totalPages; i++) {
         items.push(
           <Pagination.Item
@@ -141,8 +106,124 @@ const IssueList = () => {
     return items;
   };
 
+  if (loading) {
+    return <h2 className="text-center">Loading...</h2>;
+  }
+
+  if (!issueList || issueList.length === 0) {
+    return <h2 className="text-center">No issues found.</h2>;
+  }
+
   return (
     <Container>
+      {/* Filter Radio Buttons */}
+      <Row className="mb-3">
+        <Col md={12} className="d-flex justify-content-center">
+          <Form>
+            <Form.Check
+              inline
+              label="All"
+              type="radio"
+              value="All"
+              checked={filter === "All"}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1); // Reset to first page on filter change
+              }}
+            />
+            <Form.Check
+              inline
+              label="Pending"
+              type="radio"
+              value="Pending"
+              checked={filter === "Pending"}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <Form.Check
+              inline
+              label="Assigned"
+              type="radio"
+              value="Assigned"
+              checked={filter === "Assigned"}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <Form.Check
+              inline
+              label="In Progress"
+              type="radio"
+              value="In Progress"
+              checked={filter === "In Progress"}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <Form.Check
+              inline
+              label="Resolved"
+              type="radio"
+              value="Resolved"
+              checked={filter === "Resolved"}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <Form.Check
+              inline
+              label="Rejected"
+              type="radio"
+              value="Rejected"
+              checked={filter === "Rejected"}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <Form.Check
+              inline
+              label="High"
+              type="radio"
+              value="High"
+              checked={filter === "High"}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <Form.Check
+              inline
+              label="Medium"
+              type="radio"
+              value="Medium"
+              checked={filter === "Medium"}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <Form.Check
+              inline
+              label="Low"
+              type="radio"
+              value="Low"
+              checked={filter === "Low"}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </Form>
+        </Col>
+      </Row>
+
+      {/* Display Issues */}
       <Row>
         {currentIssues.map((issue, index) => (
           <Col key={index} md={12} lg={6}>
@@ -152,27 +233,29 @@ const IssueList = () => {
       </Row>
 
       {/* Pagination */}
-      <Row className="justify-content-center mt-4">
-        <Pagination>
-          <Pagination.First
-            onClick={() => handlePageChange(1)}
-            disabled={currentPage === 1}
-          />
-          <Pagination.Prev
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          />
-          {renderPaginationItems()}
-          <Pagination.Next
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          />
-          <Pagination.Last
-            onClick={() => handlePageChange(totalPages)}
-            disabled={currentPage === totalPages}
-          />
-        </Pagination>
-      </Row>
+      {filteredIssues.length > issuesPerPage && (
+        <Row className="justify-content-center mt-4">
+          <Pagination>
+            <Pagination.First
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+            />
+            <Pagination.Prev
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            />
+            {renderPaginationItems()}
+            <Pagination.Next
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            />
+            <Pagination.Last
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            />
+          </Pagination>
+        </Row>
+      )}
     </Container>
   );
 };

@@ -6,8 +6,7 @@ const IssueCard = ({ issue }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate("/adminIssueDetail", { state: { issue } });
-    return;
+    navigate("/departmentAdminIssueDetail", { state: { issue } });
   };
 
   const getPriorityBadgeVariant = (priority) => {
@@ -44,30 +43,22 @@ const IssueCard = ({ issue }) => {
     <Card
       onClick={handleCardClick}
       className="mb-3"
-      style={{
-        cursor: "pointer",
-        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-        border: "1px solid #ddd",
-      }}
+      style={{ cursor: "pointer", boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}
     >
       <Card.Body>
-        {/* First Row: Title, Priority, and Status */}
+        {/* First Row: Title and CreatedAt */}
         <div className="d-flex justify-content-between align-items-center mb-2">
           <h5 className="mb-0">{issue.title}</h5>
-          <div>
-            <Badge
-              bg={getPriorityBadgeVariant(issue?.priority)}
-              className="me-2"
-            >
-              {issue?.priority} Priority
-            </Badge>
-            <Badge bg={getStatusBadgeVariant(issue?.status)}>
-              {issue?.status}
-            </Badge>
-          </div>
+
+          <Badge bg={getPriorityBadgeVariant(issue?.priority)}>
+            {issue?.priority} Priority
+          </Badge>
+          <Badge bg={getStatusBadgeVariant(issue?.status)}>
+            {issue?.status}
+          </Badge>
         </div>
 
-        {/* Second Row: Category and Name */}
+        {/* Second Row: Category, Priority, and Department */}
         <div className="d-flex justify-content-between mb-2">
           <span>
             <strong>Category:</strong> {issue.category}
@@ -77,17 +68,15 @@ const IssueCard = ({ issue }) => {
           </span>
         </div>
 
-        {/* Third Row: Department and CMS */}
-        <div className="d-flex justify-content-between mb-2">
+        {/* Third Row: CMS and Email */}
+        <div className="d-flex justify-content-between">
           <span>
             <strong>Department:</strong> {issue.department}
           </span>
           <span>
-            <strong>CMS:</strong> {issue.createdBy.cms}
+            <strong>Cms:</strong> {issue.createdBy.cms}
           </span>
         </div>
-
-        {/* Fourth Row: Created At */}
         <div
           style={{
             display: "flex",
@@ -95,7 +84,7 @@ const IssueCard = ({ issue }) => {
             marginTop: "1vh",
           }}
         >
-          <small className="text-muted text-center">
+          <small className=" text-muted text-center">
             <strong>Created At: </strong>
             {new Date(issue.createdAt).toLocaleString()}
           </small>

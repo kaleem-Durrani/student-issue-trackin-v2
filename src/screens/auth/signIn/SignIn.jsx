@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const SignIn = () => {
   const [loginAs, setLoginAs] = useState("student");
@@ -24,25 +25,24 @@ const SignIn = () => {
 
     // Validate all fields are filled
     if (!email || !password) {
-      alert("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       return;
     }
-
-    console.log({
-      loginAs,
-      email,
-      password,
-    });
+    // console.log({
+    //   loginAs,
+    //   email,
+    //   password,
+    // });
 
     setLoading(true);
     const response = await login(email, password, loginAs);
     setLoading(false);
 
     if (!response.ok) {
-      console.log(response.data.error);
+      toast.error(response.data.error);
     }
 
-    // Proceed with form submission logic (e.g., API call)
+    toast.success(response.data.message, { autoClose: 2000 });
   };
 
   return (

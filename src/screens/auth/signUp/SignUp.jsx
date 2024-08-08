@@ -3,6 +3,7 @@ import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import { useAuth } from "../../../contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const departments = [
   { value: "Computer Science", label: "Computer Science" },
@@ -35,12 +36,12 @@ const SignUp = () => {
       !password ||
       !confirmPassword
     ) {
-      alert("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -65,8 +66,11 @@ const SignUp = () => {
     setLoading(false);
 
     if (!response.ok) {
-      console.log(response.data.error);
+      // console.log(response.data.error);
+      toast.error(response.data.error);
     }
+
+    toast.success(response.data.message);
 
     // Proceed with form submission logic (e.g., API call)
   };

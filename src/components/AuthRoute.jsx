@@ -7,25 +7,25 @@ import { useAuth } from "../contexts/AuthContext";
 const AuthRoute = ({ allowAuthenticated = true }) => {
   const { user, loading } = useAuth();
 
-  console.log("running AuthRoute");
+  // console.log("running AuthRoute");
 
   if (loading) {
-    console.log("running loading");
+    // console.log("running loading");
     return <div>Loading...</div>;
   }
 
   if (allowAuthenticated && user) {
     // Redirect to DefaultRedirect, which handles routing based on user type
-    console.log("running redirecting");
+    // console.log("running redirecting");
     return <Navigate to="/home" replace={true} />;
   }
 
   if (!allowAuthenticated && !user) {
-    console.log("not logged in returning outler of sign in");
+    // console.log("not logged in returning outler of sign in");
     return <Outlet />;
   }
 
-  console.log("running default redirecting");
+  // console.log("running default redirecting");
   // If user is authenticated but `allowAuthenticated` is false, redirect to the home page
   return <Navigate to="/" replace={true} />;
 };

@@ -1,104 +1,66 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 import { Card, CardContent, Typography, Grid } from "@mui/material";
+import { useIssueList } from "../../contexts/IssueListContex";
+import IssueList from "../issueList/IssueList";
 
 // Register the required components
 Chart.register(ArcElement, Tooltip, Legend);
 
-// Dummy data for issues
-const staticIssues = [
-  {
-    title: "Issue 1",
-    category: "Exam Issue",
-    priority: "High",
-    department: "Academic",
-    description: "Issue with the final exam schedule.",
-    createdBy: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      cms: "CMS001",
-      department: "Computer Science",
-    },
-    status: "Pending",
-    createdAt: "2024-08-01T10:30:00Z",
-  },
-  {
-    title: "Issue 2",
-    category: "Harassment",
-    priority: "Medium",
-    department: "Discipline",
-    description: "Harassment complaint filed by a student.",
-    createdBy: {
-      name: "Jane Doe",
-      email: "jane.doe@example.com",
-      cms: "CMS002",
-      department: "Business Administration",
-    },
-    status: "Assigned",
-    createdAt: "2024-08-02T12:45:00Z",
-  },
-  {
-    title: "Issue 3",
-    category: "Bus Schedule",
-    priority: "Low",
-    department: "Student Affairs",
-    description: "Bus schedule needs to be updated.",
-    createdBy: {
-      name: "Alice Smith",
-      email: "alice.smith@example.com",
-      cms: "CMS003",
-      department: "Management",
-    },
-    status: "Resolved",
-    createdAt: "2024-08-03T09:00:00Z",
-  },
-  {
-    title: "Issue 4",
-    category: "Bus Schedule",
-    priority: "Medium",
-    department: "Discipline",
-    description: "Bus schedule needs to be updated.",
-    createdBy: {
-      name: "Alice Smith",
-      email: "alice.smith@example.com",
-      cms: "CMS003",
-      department: "Management",
-    },
-    status: "In Progress",
-    createdAt: "2024-08-03T09:00:00Z",
-  },
-  {
-    title: "Issue 5",
-    category: "Bus Schedule",
-    priority: "Hign",
-    department: "Transport",
-    description: "Bus schedule needs to be updated.",
-    createdBy: {
-      name: "Alice Smith",
-      email: "alice.smith@example.com",
-      cms: "CMS003",
-      department: "Management",
-    },
-    status: "Rejected",
-    createdAt: "2024-08-03T09:00:00Z",
-  },
-  // Add more issues as needed...
-];
-
 const AdminHomeScreen = () => {
-  // Data aggregation for the charts and cards
-  const statusCounts = staticIssues.reduce((acc, issue) => {
+  const {
+    issueList,
+    fetchIssueList,
+    loading,
+    isError,
+    error,
+    responseProblem,
+    errorStatus,
+  } = useIssueList();
+
+  // Fetch the issue list only if it's not already loaded or if there's an error
+  useEffect(() => {
+    if (!issueList) {
+      fetchIssueList();
+    }
+  }, []);
+
+  // Correct dependency array for useEffect
+  // useEffect(() => {
+  //   if (issueList) {
+  //     console.log(issueList);
+  //   }
+  // }, [issueList]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return (
+      <div>
+        Error: {errorStatus} - {responseProblem} - {error}
+      </div>
+    );
+  }
+
+  if (!issueList || issueList.length === 0) {
+    return <h2 className="text-center">No issues found.</h2>;
+  }
+
+  // Ensure reduce functions only run when issueList is defined
+  const statusCounts = issueList.reduce((acc, issue) => {
     acc[issue.status] = (acc[issue.status] || 0) + 1;
     return acc;
   }, {});
 
-  const departmentCounts = staticIssues.reduce((acc, issue) => {
+  const departmentCounts = issueList.reduce((acc, issue) => {
     acc[issue.department] = (acc[issue.department] || 0) + 1;
     return acc;
   }, {});
 
-  const priorityCounts = staticIssues.reduce((acc, issue) => {
+  const priorityCounts = issueList.reduce((acc, issue) => {
     acc[issue.priority] = (acc[issue.priority] || 0) + 1;
     return acc;
   }, {});
@@ -157,7 +119,7 @@ const AdminHomeScreen = () => {
 
       <Grid container spacing={4} style={{ marginTop: "20px" }}>
         {[
-          { label: "All Issues", value: staticIssues.length },
+          { label: "All Issues", value: issueList.length },
           { label: "Pending", value: statusCounts.Pending || 0 },
           { label: "Assigned", value: statusCounts.Assigned || 0 },
           { label: "In Progress", value: statusCounts["In Progress"] || 0 },
