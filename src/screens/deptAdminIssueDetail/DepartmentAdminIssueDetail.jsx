@@ -12,6 +12,9 @@ import {
 import useApi from "../../hooks/useApi";
 import departmentAdminApis from "../../api/departmentAdminApis";
 import { useIssueList } from "../../contexts/IssueListContex";
+import FloatingLabel from "react-bootstrap/FloatingLabel";
+import Form from "react-bootstrap/Form";
+import { toast } from "react-toastify";
 
 const DepartmentAdminIssueDetail = () => {
   const location = useLocation();
@@ -23,6 +26,7 @@ const DepartmentAdminIssueDetail = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [actionType, setActionType] = useState(null);
+  const [comment, setComment] = useState("");
 
   const formattedDate = new Date(issue?.createdAt).toLocaleString("en-US", {
     weekday: "long",
@@ -66,20 +70,25 @@ const DepartmentAdminIssueDetail = () => {
 
   const handleUpdateIssue = async () => {
     if (actionType) {
-      await updateIssueApi.request(issue._id, actionType);
+      if (actionType === "Resolved" && comment === "") {
+        return toast.error(
+          "Please provide a comment to how the issue was resolved"
+        );
+      }
+      await updateIssueApi.request(issue._id, actionType, comment);
     }
   };
 
   useEffect(() => {
     if (updateIssueApi.data) {
-      console.log("success", updateIssueApi.data.message);
+      // console.log("success", updateIssueApi.data.message);
       refreshIssueList();
       navigate("/departmentAdminHome");
       return;
     }
 
     if (updateIssueApi.error) {
-      console.log("error", updateIssueApi.error);
+      // console.log("error", updateIssueApi.error);
       return;
     }
   }, [updateIssueApi.data, updateIssueApi.error]);
@@ -160,6 +169,17 @@ const DepartmentAdminIssueDetail = () => {
             </Col>
           </Row>
 
+          {/* if issue has been rejecgted or resolved and there is an issue.comment */}
+
+          {issue?.comment && (
+            <Row className="mt-4">
+              <Col>
+                <h5>Comment</h5>
+                <p>{issue?.comment}</p>
+              </Col>
+            </Row>
+          )}
+
           <Row>
             <Col md={4} />
             <Col
@@ -194,7 +214,25 @@ const DepartmentAdminIssueDetail = () => {
           <Modal.Title>Confirm Action</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to set this issue to "{actionType}"?
+          <>
+            Are you sure you want to set this issue to "{actionType}"?
+            <br />
+            <br />
+            {actionType === "Resolved" ? (
+              <>
+                <strong>Please write Rejection reason</strong>
+                <FloatingLabel label="Comment">
+                  <Form.Control
+                    type="text"
+                    placeholder="Comment"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    required
+                  />
+                </FloatingLabel>
+              </>
+            ) : null}
+          </>
         </Modal.Body>
         <Modal.Footer>
           <Button

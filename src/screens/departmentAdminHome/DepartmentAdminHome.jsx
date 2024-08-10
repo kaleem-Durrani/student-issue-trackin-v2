@@ -139,13 +139,13 @@ const DepartmentAdminHome = () => {
 
       {/* Filter Radio Buttons */}
       <Row className="mb-3">
-        <Col md={3}></Col>
+        {/* <Col md={3}></Col> */}
         <Col
           style={{
             display: "flex",
             justifyContent: "flex-end",
           }}
-          md={9}
+          md={12}
         >
           <Form>
             <Form.Check

@@ -27,7 +27,7 @@ const AuthRoute = ({ allowAuthenticated = true }) => {
 
   // console.log("running default redirecting");
   // If user is authenticated but `allowAuthenticated` is false, redirect to the home page
-  return <Navigate to="/" replace={true} />;
+  return <Navigate to="/home" replace={true} />;
 };
 
 export default AuthRoute;

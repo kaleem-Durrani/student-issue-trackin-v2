@@ -10,7 +10,8 @@ const assignIssue = (issueId, category, priority, department) =>
     department,
   });
 
-const rejectIssue = (issueId) => client.put("/issue/reject-issue", { issueId });
+const rejectIssue = (issueId, comment) =>
+  client.put("/issue/reject-issue", { issueId, comment });
 
 export default {
   getAllIssues,

@@ -13,11 +13,16 @@ import Select from "react-select";
 import useApi from "../../hooks/useApi";
 import adminApis from "../../api/adminApis";
 import { useIssueList } from "../../contexts/IssueListContex";
+import FloatingLabel from "react-bootstrap/FloatingLabel";
+import Form from "react-bootstrap/Form";
+import { toast } from "react-toastify";
 
 const AdminIssueDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { issue } = location.state || {};
+  const [comment, setComment] = useState("");
+
   const { refreshIssueList } = useIssueList();
 
   const [loading, setLoading] = useState(false);
@@ -95,7 +100,14 @@ const AdminIssueDetail = () => {
         selectedDepartment?.value
       );
     } else {
-      await apiFunc.request(issue._id);
+      if (comment === "") {
+        toast.error("Rejection Reason is required");
+        setLoading(false);
+        return;
+      }
+      // console.log(comment);
+
+      await apiFunc.request(issue._id, comment);
     }
 
     setLoading(false);
@@ -227,6 +239,19 @@ const AdminIssueDetail = () => {
               <p>{issue?.description}</p>
             </Col>
           </Row>
+
+          {/* if issue has been rejecgted or resolved and there is an issue.comment */}
+
+          {issue?.comment && (
+            <Row className="mt-4">
+              <Col>
+                <h5>Comment</h5>
+                <p>{issue?.comment}</p>
+              </Col>
+            </Row>
+          )}
+
+          {/* if issue status is assigned */}
           {issue.status === "Pending" && (
             <Row className="mt-4">
               <Col className="text-center">
@@ -270,6 +295,21 @@ const AdminIssueDetail = () => {
           <p>
             <strong>Department:</strong> {selectedDepartment?.label}
           </p>
+
+          {actionType === "reject" ? (
+            <>
+              <strong>Please write Rejection reason</strong>
+              <FloatingLabel label="Comment">
+                <Form.Control
+                  type="text"
+                  placeholder="Comment"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  required
+                />
+              </FloatingLabel>
+            </>
+          ) : null}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>

@@ -39,10 +39,10 @@ const SignIn = () => {
     setLoading(false);
 
     if (!response.ok) {
-      toast.error(response.data.error);
+      toast.error(response.data?.error);
     }
 
-    toast.success(response.data.message, { autoClose: 2000 });
+    toast.success(response.data?.message, { autoClose: 2000 });
   };
 
   return (

@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
       confirmPassword
     );
     if (response.ok) {
-      console.log(response.data);
+      // console.log(response.data);
       setUser(response.data.user);
       setUserType(response.data.userType);
     }
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     if (response?.ok) {
-      console.log(response.data);
+      // console.log(response.data);
       setUser(response.data.user);
       setUserType(type);
     }

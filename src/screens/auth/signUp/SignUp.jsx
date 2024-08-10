@@ -67,10 +67,10 @@ const SignUp = () => {
 
     if (!response.ok) {
       // console.log(response.data.error);
-      toast.error(response.data.error);
+      toast.error(response.data?.error);
     }
 
-    toast.success(response.data.message);
+    toast.success(response.data?.message);
 
     // Proceed with form submission logic (e.g., API call)
   };

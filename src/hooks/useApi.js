@@ -23,7 +23,7 @@ const useApi = (apiFunc) => {
 
     if (!response.ok) {
       // console.log(response);
-      toast.error(response.data.erro);
+      toast.error(response.data.error);
       setIsError(true);
       setErronStatus(response.status);
       setResponseProblem(response.problem);

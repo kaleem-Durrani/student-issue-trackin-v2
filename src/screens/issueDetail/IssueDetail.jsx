@@ -106,6 +106,17 @@ const IssueDetail = () => {
               <Card.Text>{issue?.description}</Card.Text>
             </Col>
           </Row>
+
+          {/* if issue has been rejecgted or resolved and there is an issue.comment */}
+
+          {issue?.comment && (
+            <Row className="mt-4">
+              <Col>
+                <h5>Comment</h5>
+                <p>{issue?.comment}</p>
+              </Col>
+            </Row>
+          )}
         </Card.Body>
       </Card>
     </div>
