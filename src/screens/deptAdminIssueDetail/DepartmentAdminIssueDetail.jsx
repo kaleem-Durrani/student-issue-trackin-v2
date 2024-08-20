@@ -220,7 +220,9 @@ const DepartmentAdminIssueDetail = () => {
             <br />
             {actionType === "Resolved" ? (
               <>
-                <strong>Please write Rejection reason</strong>
+                <strong>
+                  Please write a cooment about how the issue was Resolved.
+                </strong>
                 <FloatingLabel label="Comment">
                   <Form.Control
                     type="text"
